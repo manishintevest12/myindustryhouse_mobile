@@ -19,6 +19,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _phoneCtrl = TextEditingController();
   final _otpCtrl = TextEditingController();
   bool _otpSent = false;
+  String _role = 'BUYER';
   bool _busy = false;
   String? _error;
 
@@ -26,7 +27,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() { _busy = true; _error = null; });
     final res = await AuthRepository.instance.requestOtp(
       phone: _phoneCtrl.text.trim(),
-      role: 'BUYER', // role choice lands with the full login screen in phase 2
+      role: _role,
     );
     if (!mounted) return;
     setState(() {
@@ -72,7 +73,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             const SizedBox(height: 8),
             const Text('Verified industrial trading, direct buyer to seller.',
                 style: TextStyle(fontSize: 13)),
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
+            SegmentedButton<String>(
+              segments: const [
+                ButtonSegment(value: 'BUYER', label: Text('Buyer'), icon: Icon(Icons.shopping_cart_outlined, size: 16)),
+                ButtonSegment(value: 'SELLER', label: Text('Seller'), icon: Icon(Icons.storefront_outlined, size: 16)),
+              ],
+              selected: {_role},
+              onSelectionChanged: (s) => setState(() => _role = s.first),
+            ),
+            const SizedBox(height: 20),
             TextField(
               controller: _phoneCtrl,
               keyboardType: TextInputType.phone,

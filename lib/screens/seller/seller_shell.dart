@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../shared/placeholder_panel.dart';
+import '../shared/chats_tab.dart';
+import '../shared/profile_tab.dart';
+import 'dashboard_tab.dart';
+import 'leads_tab.dart';
+import 'products_tab.dart';
 
 /// Seller shell with the role-specific bottom navigation:
 /// Dashboard (stats) - Manage Products - Orders/Leads - Chats/Calls - Profile
@@ -17,31 +21,11 @@ class _SellerShellState extends State<SellerShell> {
   @override
   Widget build(BuildContext context) {
     final pages = <Widget>[
-      const PlaceholderPanel(
-        title: 'Seller Dashboard',
-        description:
-            'Live sales stats, conversion analytics and lead-credit balance - populated from /api/v1/sellers/:id/analytics/conversions and credits.',
-      ),
-      const PlaceholderPanel(
-        title: 'Manage Products',
-        description:
-            'Your catalog listings: create, edit and publish products - populated from /api/v1/products and /api/v1/catalogs/items.',
-      ),
-      const PlaceholderPanel(
-        title: 'Orders & Leads',
-        description:
-            'Matched RFQ leads, unlocking and order management - populated from /api/v1/sellers/:id/leads/matched and /api/v1/leads.',
-      ),
-      const PlaceholderPanel(
-        title: 'Chats & Calls',
-        description:
-            'Buyer conversations, quotes, voice bridge and Meet sessions - populated from /api/v1/messages and Twilio/Meet routes.',
-      ),
-      const PlaceholderPanel(
-        title: 'Profile',
-        description:
-            'Company profile, KYC, staff and subscription - synced with the existing seller routes.',
-      ),
+      const SellerDashboardTab(),
+      const SellerProductsTab(),
+      const SellerLeadsTab(),
+      const ChatsTab(),
+      const ProfileTab(),
     ];
 
     return Scaffold(

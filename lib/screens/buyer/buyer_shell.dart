@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../shared/placeholder_panel.dart';
+import '../shared/chats_tab.dart';
+import '../shared/profile_tab.dart';
+import 'home_tab.dart';
+import 'orders_tab.dart';
+import 'search_tab.dart';
 
 /// Buyer shell with the role-specific bottom navigation:
 /// Home/Explore - Search/Categories - My Orders/Cart - Chats/Calls - Profile
@@ -17,31 +21,11 @@ class _BuyerShellState extends State<BuyerShell> {
   @override
   Widget build(BuildContext context) {
     final pages = <Widget>[
-      const PlaceholderPanel(
-        title: 'Home & Explore',
-        description:
-            'Industrial product feed, verified sellers and live RFQ discovery - populated from /api/v1/products and /api/v1/sellers.',
-      ),
-      const PlaceholderPanel(
-        title: 'Search & Categories',
-        description:
-            'Full catalog search with categories and similar-product suggestions - populated from /api/v1/catalogs/items.',
-      ),
-      const PlaceholderPanel(
-        title: 'My Orders & RFQs',
-        description:
-            'Your B2B orders, proforma/tax invoices and cart - populated from the existing commerce routes (PI -> UTR -> TI).',
-      ),
-      const PlaceholderPanel(
-        title: 'Chats & Calls',
-        description:
-            'Direct chat, voice call bridge and Google Meet sessions with sellers - populated from /api/v1/messages and the Twilio/Meet routes.',
-      ),
-      const PlaceholderPanel(
-        title: 'Profile',
-        description:
-            'Your buyer profile, KYC status and account settings - synced with /api/v1/auth/sync-user.',
-      ),
+      const BuyerHomeTab(),
+      const BuyerSearchTab(),
+      const BuyerOrdersTab(),
+      const ChatsTab(),
+      const ProfileTab(),
     ];
 
     return Scaffold(

@@ -28,7 +28,7 @@ class AppTheme {
   static ThemeData get dark => ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
-        colorScheme: const ColorScheme.dark(
+        colorScheme: ColorScheme.dark(
           primary: AppPalette.primary,
           onPrimary: const Color(0xFF1C1917),
           secondary: AppPalette.sellerAccent,
