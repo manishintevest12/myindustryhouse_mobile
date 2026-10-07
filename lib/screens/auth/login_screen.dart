@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/app_config.dart';
 import '../../data/auth_repository.dart';
 import '../../providers/session_provider.dart';
 
@@ -27,7 +26,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() { _busy = true; _error = null; });
     final res = await AuthRepository.instance.requestOtp(
       phone: _phoneCtrl.text.trim(),
-      role: 'BUYER', // role selection UI comes with the full login screen
+      role: 'BUYER', // role choice lands with the full login screen in phase 2
     );
     if (!mounted) return;
     setState(() {
@@ -106,12 +105,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ? 'Please wait...'
                   : (_otpSent ? 'Verify & Continue' : 'Get OTP via SMS')),
             ),
-            const SizedBox(height: 16),
-            const Text(
-              AppConfig.adminBlockedMessage,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 11, color: Colors.grey),
-            ),
+
           ],
         ),
       ),

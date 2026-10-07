@@ -5,6 +5,7 @@ import 'core/app_theme.dart';
 import 'providers/session_provider.dart';
 import 'screens/admin/admin_blocked_screen.dart';
 import 'screens/auth/login_screen.dart';
+import 'screens/splash_screen.dart';
 import 'screens/buyer/buyer_shell.dart';
 import 'screens/seller/seller_shell.dart';
 
@@ -36,9 +37,7 @@ class _AuthGate extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final gate = ref.watch(authGateProvider);
     return switch (gate) {
-      AuthGate.loading => const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        ),
+      AuthGate.loading => const SplashScreen(),
       AuthGate.signedOut => const LoginScreen(),
       AuthGate.buyer => const BuyerShell(),
       AuthGate.seller => const SellerShell(),
