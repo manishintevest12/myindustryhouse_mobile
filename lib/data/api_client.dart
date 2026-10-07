@@ -1,0 +1,81 @@
+import 'package:dio/dio.dart';
+
+import '../core/app_config.dart';
+
+/// Thin Dio wrapper around the EXISTING backend. It only attaches session
+/// headers, maps transport errors to friendly messages, and enforces
+/// timeouts. Business logic stays 100% on the server - untouched.
+class ApiClient {
+  ApiClient._() {
+    _dio = Dio(
+      BaseOptions(
+        baseUrl: AppConfig.apiBaseUrl,
+        connectTimeout: AppConfig.apiConnectTimeout,
+        receiveTimeout: AppConfig.apiReceiveTimeout,
+        headers: {'Accept': 'application/json'},
+      ),
+    );
+  }
+
+  static final ApiClient instance = ApiClient._();
+
+  late final Dio _dio;
+
+  /// Called by the session provider after login (and after restoring a
+  /// persisted session) so every request carries the auth context.
+  void attachSession({String? token, String? email}) {
+    _dio.options.headers['x-mih-session-token'] = token ?? '';
+    if (email != null) {
+      _dio.options.headers['x-mih-session-email'] = email;
+    }
+  }
+
+  void clearSession() {
+    _dio.options.headers.remove('x-mih-session-token');
+    _dio.options.headers.remove('x-mih-session-email');
+  }
+
+  Future<Map<String, dynamic>> get(String path, {Map<String, dynamic>? query}) async =>
+      _run(() => _dio.get<Map<String, dynamic>>(path, queryParameters: query));
+
+  Future<Map<String, dynamic>> post(String path, {Object? body}) async =>
+      _run(() => _dio.post<Map<String, dynamic>>(path, data: body));
+
+  Future<Map<String, dynamic>> put(String path, {Object? body}) async =>
+      _run(() => _dio.put<Map<String, dynamic>>(path, data: body));
+
+  Future<Map<String, dynamic>> delete(String path) async =>
+      _run(() => _dio.delete<Map<String, dynamic>>(path));
+
+  Future<Map<String, dynamic>> _run(
+      Future<Response<Map<String, dynamic>>> Function() call) async {
+    try {
+      final res = await call();
+      return res.data ?? <String, dynamic>{};
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      if (data is Map<String, dynamic>) {
+        // Backend's own honest error envelope - surface it as-is.
+        return {
+          ...data,
+          '__http_error': e.response?.statusCode,
+        };
+      }
+      return {
+        'success': false,
+        '__transport_error': e.type.name,
+        'message': _friendly(e),
+      };
+    }
+  }
+
+  String _friendly(DioException e) => switch (e.type) {
+        DioExceptionType.connectionTimeout ||
+        DioExceptionType.sendTimeout ||
+        DioExceptionType.receiveTimeout =>
+          'The server took too long to respond. Check your connection and try again.',
+        DioExceptionType.connectionError =>
+          'Could not reach the server. Check your internet connection.',
+        _ => 'Something went wrong talking to the server. Please try again.',
+      };
+}
