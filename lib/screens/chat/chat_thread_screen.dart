@@ -138,9 +138,9 @@ class _ChatThreadScreenState extends ConsumerState<ChatThreadScreen> {
                       decoration: BoxDecoration(
                         color: mine
                             ? const Color(0xFFF59E0B).withValues(alpha: 0.18)
-                            : const Color(0xFF1E293B),
+                            : const Color(0xFFF1F5F9),
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: const Color(0xFF334155)),
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

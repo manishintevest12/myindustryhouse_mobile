@@ -21,7 +21,7 @@ class MyIndustryHouseApp extends StatelessWidget {
     return MaterialApp(
       title: 'MyIndustryHouse',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.dark,
+      theme: AppTheme.light,
       home: const _AuthGate(),
     );
   }

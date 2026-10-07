@@ -9,7 +9,7 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A), // slate-900, matches web
+      backgroundColor: const Color(0xFFF8FAFC), // slate-50, matches web page bg
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

@@ -57,7 +57,7 @@ class _ThreadTile extends StatelessWidget {
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
         leading: CircleAvatar(
-          backgroundColor: const Color(0xFF1E293B),
+          backgroundColor: Colors.white,
           child: Icon(
             message.isCallLog ? Icons.call_rounded : Icons.chat_bubble_rounded,
             size: 20,
