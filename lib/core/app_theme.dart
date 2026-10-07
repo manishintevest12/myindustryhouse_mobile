@@ -27,7 +27,10 @@ class AppPalette {
 class AppTheme {
   AppTheme._();
 
+  static const String fontFamily = 'PlusJakartaSans'; // web: Plus Jakarta Sans
+
   static ThemeData get light => ThemeData(
+        fontFamily: fontFamily,
         useMaterial3: true,
         brightness: Brightness.light,
         colorScheme: const ColorScheme.light(
