@@ -53,20 +53,35 @@ class ApiClient {
       final res = await call();
       return res.data ?? <String, dynamic>{};
     } on DioException catch (e) {
-      final data = e.response?.data;
-      if (data is Map<String, dynamic>) {
-        // Backend's own honest error envelope - surface it as-is.
-        return {
-          ...data,
-          '__http_error': e.response?.statusCode,
-        };
+      // One retry for genuine transport failures (flaky mobile data,
+      // DNS hiccup) before reporting - HTTP errors are never retried.
+      if (e.type == DioExceptionType.connectionError ||
+          e.type == DioExceptionType.connectionTimeout) {
+        try {
+          final res = await call();
+          return res.data ?? <String, dynamic>{};
+        } on DioException catch (e2) {
+          return _asError(e2);
+        }
       }
+      return _asError(e);
+    }
+  }
+
+  Map<String, dynamic> _asError(DioException e) {
+    final data = e.response?.data;
+    if (data is Map<String, dynamic>) {
+      // Backend's own honest error envelope - surface it as-is.
       return {
-        'success': false,
-        '__transport_error': e.type.name,
-        'message': _friendly(e),
+        ...data,
+        '__http_error': e.response?.statusCode,
       };
     }
+    return {
+      'success': false,
+      '__transport_error': e.type.name,
+      'message': _friendly(e),
+    };
   }
 
   String _friendly(DioException e) => switch (e.type) {
@@ -75,7 +90,7 @@ class ApiClient {
         DioExceptionType.receiveTimeout =>
           'The server took too long to respond. Check your connection and try again.',
         DioExceptionType.connectionError =>
-          'Could not reach the server. Check your internet connection.',
+          'Could not reach ${AppConfig.apiBaseUrl}. Check your internet connection and retry.',
         _ => 'Something went wrong talking to the server. Please try again.',
       };
 }
