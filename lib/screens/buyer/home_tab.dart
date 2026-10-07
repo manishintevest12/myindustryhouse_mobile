@@ -5,6 +5,7 @@ import '../../data/models/seller.dart';
 import '../../providers/app_data_providers.dart';
 import '../shared/api_future_view.dart';
 import '../shared/product_card.dart';
+import 'product_detail_screen.dart';
 
 /// Buyer Home: live product feed + verified sellers strip.
 class BuyerHomeTab extends ConsumerWidget {
@@ -31,7 +32,14 @@ class BuyerHomeTab extends ConsumerWidget {
                 for (final p in list.take(12))
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: ProductCard(product: p),
+                    child: ProductCard(
+                      product: p,
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ProductDetailScreen(product: p),
+                        ),
+                      ),
+                    ),
                   ),
               ],
             ),

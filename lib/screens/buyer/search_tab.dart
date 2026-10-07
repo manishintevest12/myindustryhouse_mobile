@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/app_data_providers.dart';
 import '../shared/api_future_view.dart';
 import '../shared/product_card.dart';
+import 'product_detail_screen.dart';
 
 /// Buyer Search: live catalog search over the existing products route.
 class BuyerSearchTab extends ConsumerWidget {
@@ -41,7 +42,14 @@ class BuyerSearchTab extends ConsumerWidget {
                   data: (list) => ListView.builder(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                     itemCount: list.length,
-                    itemBuilder: (context, i) => ProductCard(product: list[i]),
+                    itemBuilder: (context, i) => ProductCard(
+                      product: list[i],
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ProductDetailScreen(product: list[i]),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
         ),

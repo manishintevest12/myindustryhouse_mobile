@@ -55,6 +55,7 @@ class SellerProductsTab extends ConsumerWidget {
     final price = TextEditingController();
     final category = TextEditingController();
     final description = TextEditingController();
+    final imageUrl = TextEditingController();
     bool busy = false;
 
     await showModalBottomSheet(
@@ -90,6 +91,13 @@ class SellerProductsTab extends ConsumerWidget {
                   controller: description,
                   maxLines: 3,
                   decoration: const InputDecoration(labelText: 'Description')),
+              const SizedBox(height: 10),
+              TextField(
+                  controller: imageUrl,
+                  keyboardType: TextInputType.url,
+                  decoration: const InputDecoration(
+                      labelText: 'Image URL (optional)',
+                      helperText: 'Paste a hosted image link')),
               const SizedBox(height: 16),
               FilledButton(
                 onPressed: busy
@@ -113,6 +121,9 @@ class SellerProductsTab extends ConsumerWidget {
                           'category': category.text.trim(),
                           'description': description.text.trim(),
                           'sellerId': me?.userId ?? '',
+                          'imageUrl': imageUrl.text.trim().isEmpty
+                              ? null
+                              : imageUrl.text.trim(),
                         });
                         if (ctx.mounted) Navigator.pop(ctx);
                         if (res['status'] == 'SUCCESS' || res['success'] == true) {
