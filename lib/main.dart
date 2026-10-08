@@ -30,12 +30,29 @@ class MyIndustryHouseApp extends StatelessWidget {
 /// Single routing decision point: watch the session, then route by role.
 /// Buyer -> Buyer Shell, Seller -> Seller Shell, Admin -> BLOCKED screen,
 /// signed out -> Login.
-class _AuthGate extends ConsumerWidget {
+class _AuthGate extends ConsumerStatefulWidget {
   const _AuthGate();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_AuthGate> createState() => _AuthGateState();
+}
+
+class _AuthGateState extends ConsumerState<_AuthGate> {
+  bool _minSplashDone = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Splash is always shown first for a short, deliberate moment.
+    Future.delayed(const Duration(milliseconds: 1800), () {
+      if (mounted) setState(() => _minSplashDone = true);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final gate = ref.watch(authGateProvider);
+    if (!_minSplashDone) return const SplashScreen();
     return switch (gate) {
       AuthGate.loading => const SplashScreen(),
       AuthGate.signedOut => const LoginScreen(),

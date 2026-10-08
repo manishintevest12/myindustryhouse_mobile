@@ -20,12 +20,15 @@ class AuthRepository {
   Future<Map<String, dynamic>> requestOtp({
     required String phone,
     String deliveryMethod = 'SMS',
+    String? deliveryEmail,
   }) =>
       ApiClient.instance.post(Api.sendOtp, body: {
         'countryCode': '+91',
         'phone': phone,
         'deliveryMethod': deliveryMethod,
-        'purpose': 'Phone Verification',
+        'purpose': deliveryEmail == null ? 'Phone Verification' : 'Signup Verification',
+        if (deliveryEmail != null) 'deliveryEmail': deliveryEmail,
+        if (deliveryEmail != null) 'recipientName': 'MyIndustryHouse User',
       });
 
   Future<Map<String, dynamic>> verifyOtp({

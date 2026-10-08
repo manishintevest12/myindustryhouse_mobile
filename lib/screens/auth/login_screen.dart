@@ -101,13 +101,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _error = null;
       _info = null;
     });
-    final res = await AuthRepository.instance.requestOtp(phone: _digits, deliveryMethod: method);
+    final res = await AuthRepository.instance.requestOtp(
+      phone: _digits,
+      deliveryMethod: method,
+      // First-time signup: the code goes to the phone AND the email.
+      // Returning users (sign in) get the code on the phone only.
+      deliveryEmail: _signUp ? _emailCtrl.text.trim().toLowerCase() : null,
+    );
     if (!mounted) return;
     if (AuthRepository.ok(res)) {
       setState(() {
         _busy = false;
         _otpSent = true;
-        _info = AuthRepository.msg(res, 'OTP sent. Please check your phone.');
+        _info = _signUp
+            ? 'OTP sent to +91 $_digits and ${_emailCtrl.text.trim()}. Enter the code to create your account.'
+            : 'OTP sent to +91 $_digits. Enter the code to sign in.';
         _resendIn = 30;
       });
       _tickResend();
@@ -197,16 +205,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     Row(
                       children: [
                         Container(
-                          width: 36,
-                          height: 36,
+                          width: 40,
+                          height: 40,
+                          padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
-                            color: AppPalette.primary,
+                            color: Colors.white,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          alignment: Alignment.center,
-                          child: const Text('M',
-                              style: TextStyle(
-                                  color: Colors.white, fontWeight: FontWeight.w900, fontSize: 18)),
+                          child: Image.asset('assets/logo_mark.png', fit: BoxFit.contain),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -512,7 +518,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ],
       if (_otpSent) ...[
         const SizedBox(height: 14),
-        _label('Enter the 6-digit OTP'),
+        _label(_signUp ? 'Enter the OTP (sent to phone and email)' : 'Enter the 6-digit OTP'),
         TextField(
           controller: _otpCtrl,
           autofocus: true,
