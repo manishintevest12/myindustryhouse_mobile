@@ -2,23 +2,30 @@ import 'api_client.dart';
 import 'endpoints.dart';
 import 'models/user_session.dart';
 
-/// Wraps the EXISTING SMS OTP auth flow. No server changes; this mirrors
-/// the web client's calls one-for-one.
+/// Mirrors the web client's SMS account flow one-for-one:
+///  1. send-real-sms-otp      -> status: SUCCESS
+///  2. verify-real-sms-otp    -> accountSessionToken
+///  3. auth/sms-account (Bearer token + role [+ signup fields]) -> profile
 class AuthRepository {
   const AuthRepository._();
   static const instance = AuthRepository._();
 
+  /// The backend answers with `status: 'SUCCESS' | 'FAILURE'` (not `success`).
+  static bool ok(Map<String, dynamic> r) =>
+      r['status'] == 'SUCCESS' || r['success'] == true;
+
+  static String msg(Map<String, dynamic> r, String fallback) =>
+      (r['message'] ?? r['reason'] ?? fallback).toString();
+
   Future<Map<String, dynamic>> requestOtp({
     required String phone,
-    String? fullName,
-    String? email,
-    required String role,
+    String deliveryMethod = 'SMS',
   }) =>
       ApiClient.instance.post(Api.sendOtp, body: {
+        'countryCode': '+91',
         'phone': phone,
-        'full_name': fullName,
-        'email': email,
-        'role': role,
+        'deliveryMethod': deliveryMethod,
+        'purpose': 'Phone Verification',
       });
 
   Future<Map<String, dynamic>> verifyOtp({
@@ -26,23 +33,34 @@ class AuthRepository {
     required String code,
   }) =>
       ApiClient.instance.post(Api.verifyOtp, body: {
+        'countryCode': '+91',
         'phone': phone,
         'code': code,
       });
 
-  Future<Map<String, dynamic>> syncProfile(Map<String, dynamic> profile) =>
-      ApiClient.instance.post(Api.syncUser, body: profile);
+  /// Step 3: turn the verified SMS session into a buyer/seller account.
+  /// Sends the SMS token explicitly (no global session yet at this point).
+  Future<Map<String, dynamic>> completeAccount({
+    required String token,
+    required String role,
+    Map<String, dynamic> fields = const {},
+  }) =>
+      ApiClient.instance.postWithToken(
+        '/api/v1/auth/sms-account',
+        token: token,
+        body: {'role': role, ...fields},
+      );
 
-  /// Post-verification session assembly. Reads the API's user payload and
-  /// produces the client-side session (or flags admin for the mobile block).
-  UserSession? parseSession(Map<String, dynamic> verifyResponse) {
-    final user = (verifyResponse['user'] ??
-        verifyResponse['profile'] ??
-        verifyResponse) as Map<String, dynamic>;
-    final token = (verifyResponse['session_token'] ??
-        verifyResponse['token'] ??
-        '') as String;
-    if (token.isEmpty) return null;
-    return UserSession.fromApiJson({...user, 'session_token': token});
+  UserSession? parseSession(Map<String, dynamic> accountResponse, String token) {
+    final p = accountResponse['profile'];
+    if (p is! Map) return null;
+    final profile = Map<String, dynamic>.from(p);
+    return UserSession.fromApiJson({
+      ...profile,
+      'user_id': profile['uid'],
+      'full_name': profile['fullName'],
+      'company_name': profile['companyName'],
+      'session_token': token,
+    });
   }
 }

@@ -24,15 +24,16 @@ class ApiClient {
   /// Called by the session provider after login (and after restoring a
   /// persisted session) so every request carries the auth context.
   void attachSession({String? token, String? email}) {
-    _dio.options.headers['x-mih-session-token'] = token ?? '';
-    if (email != null) {
-      _dio.options.headers['x-mih-session-email'] = email;
+    // Web parity: SMS account sessions are sent as a Bearer token.
+    if (token != null && token.isNotEmpty) {
+      _dio.options.headers['Authorization'] = 'Bearer $token';
+    } else {
+      _dio.options.headers.remove('Authorization');
     }
   }
 
   void clearSession() {
-    _dio.options.headers.remove('x-mih-session-token');
-    _dio.options.headers.remove('x-mih-session-email');
+    _dio.options.headers.remove('Authorization');
   }
 
   Future<Map<String, dynamic>> get(String path, {Map<String, dynamic>? query}) async =>
@@ -40,6 +41,12 @@ class ApiClient {
 
   Future<Map<String, dynamic>> post(String path, {Object? body}) async =>
       _run(() => _dio.post<Map<String, dynamic>>(path, data: body));
+
+  Future<Map<String, dynamic>> postWithToken(String path,
+          {required String token, Object? body}) async =>
+      _run(() => _dio.post<Map<String, dynamic>>(path,
+          data: body,
+          options: Options(headers: {'Authorization': 'Bearer $token'})));
 
   Future<Map<String, dynamic>> put(String path, {Object? body}) async =>
       _run(() => _dio.put<Map<String, dynamic>>(path, data: body));
